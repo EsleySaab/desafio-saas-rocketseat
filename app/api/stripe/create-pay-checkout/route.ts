@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
 
   const metadata = {
     testeId,
+    price
   }
 
   try {

@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
 
   const metadata = {
     testeId,
+    price,
+    userId,
   }
 
   try {
@@ -48,6 +50,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+    return NextResponse.json({ sessionId: session.id }, { status: 200 })
   } catch (error) {
     console.error(error)
     return NextResponse.error()
