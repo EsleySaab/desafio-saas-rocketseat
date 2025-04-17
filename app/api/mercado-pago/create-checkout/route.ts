@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
         },
         auto_return: "approved",
         back_urls: {
-          success: `${request.headers.get("origin")}api/mercado-pago/pending`,
-          failure: `${request.headers.get("origin")}api/mercado-pago/pending`,
-          pending: `${request.headers.get("origin")}api/mercado-pago/pending`,
+          success: `${request.headers.get("origin")}/api/mercado-pago/pending`,
+          failure: `${request.headers.get("origin")}/api/mercado-pago/pending`,
+          pending: `${request.headers.get("origin")}/api/mercado-pago/pending`,
         },
       },
     })
