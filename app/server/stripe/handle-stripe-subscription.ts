@@ -18,7 +18,6 @@ export async function handleStripeSubscription(
     }
 
     await db.collection("users").doc(userId).update({
-      stripeCustomerId: event.data.object.customer,
       stripeSubscriptionId: event.data.object.subscription,
       subscriptionStatus: "active",
     })

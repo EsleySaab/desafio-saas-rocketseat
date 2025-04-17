@@ -4,14 +4,21 @@ import Stripe from "stripe"
 export async function handleStripeCancelSubscription(
   event: Stripe.CustomerSubscriptionDeletedEvent
 ) {
-  const metadata = event.data.object.metadata
+  console.log("Cancelou a assinatura")
 
-  const userId = metadata?.userId
+  const customerId = event.data.object.customer
 
-  if (!userId) {
-    console.error("User ID not found")
+  const userRef = await db
+    .collection("users")
+    .where("stripeCustomerId", "==", customerId)
+    .get()
+
+  if (userRef.empty) {
+    console.error("User not found")
     return
   }
+
+  const userId = userRef.docs[0].id
 
   await db.collection("users").doc(userId).update({
     subscriptionStatus: "inactive",
