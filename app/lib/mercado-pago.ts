@@ -20,16 +20,11 @@ export function validateMercadoPagoWebhook(request: NextRequest) {
   }
 
   const signatureParts = xSignature.split(",")
-  let ts = ""
-  let v1 = ""
-  signatureParts.forEach((part) => {
-    const [key, value] = part.split("=")
-    if (key.trim() === "ts") {
-      ts = value.trim()
-    } else if (key.trim() === "v1") {
-      v1 = value.trim()
-    }
-  })
+  const parts = Object.fromEntries(
+    signatureParts.map((part) => part.trim().split("="))
+  )
+  const ts = parts.ts
+  const v1 = parts.v1
 
   if (!ts || !v1) {
     return NextResponse.json(
@@ -42,15 +37,17 @@ export function validateMercadoPagoWebhook(request: NextRequest) {
   const dataId = url.searchParams.get("data.id")
 
   let manifest = ""
-  if (dataId) {
-    manifest += `id:${dataId};`
-  }
-  if (xRequestId) {
-    manifest += `request-id:${xRequestId};`
-  }
-  manifest += `ts:${ts};`
+  if (dataId) manifest += `id:${dataId};`
+  manifest += `request-id:${xRequestId};ts:${ts};`
 
-  const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET!
+  const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET
+  if (!secret) {
+    return NextResponse.json(
+      { error: "Missing webhook secret" },
+      { status: 500 }
+    )
+  }
+
   const hmac = crypto.createHmac("sha256", secret)
   hmac.update(manifest)
   const generatedHash = hmac.digest("hex")
@@ -58,4 +55,7 @@ export function validateMercadoPagoWebhook(request: NextRequest) {
   if (generatedHash !== v1) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
   }
+
+  return NextResponse.json({ message: "Signature validated" }, { status: 200 })
 }
+
